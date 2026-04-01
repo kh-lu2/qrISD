@@ -29,6 +29,7 @@ print_matrix(classical_matrix, "Input matrix")
 n = 3
 
 for i in range(n):
+    # pivot search
     for j in range(i + 1, n):
         controls = q_matrix[i, i:j]
 
@@ -40,11 +41,13 @@ for i in range(n):
 
         x(controls)
 
+    # row reduce
     for j in range(i + 1, n):
         with control(q_matrix[j, i]):
             for col in range(i + 1, n + 1):
                 cx(q_matrix[i, col], q_matrix[j, col])
 
+# back substitution
 for i in range(n - 1, 0, -1):
     for j in range(i - 1, -1, -1):
         with control(q_matrix[j, i]):
