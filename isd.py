@@ -27,31 +27,38 @@ print("Expected values: x1 = 0, x2 = 1, x3 = 0\n")
 print_matrix(classical_matrix, "Input matrix")
 
 n = 3
+k = 3
+
+X = QuantumArray(qtype=QuantumBool(), shape=(k,))
+x(X)
 
 for i in range(n):
-    # pivot search
-    for j in range(i + 1, n):
-        controls = q_matrix[i, i:j]
+    with control(X[i][0]):
+        # pivot search
+        for j in range(i + 1, n):
+            # controls = q_matrix[i, i:j]
+            controls = q_matrix[i:j, i]
 
-        x(controls)
+            x(controls)
 
-        with control([qb[0] for qb in controls]):
-            for col in range(i + 1, n + 1):
-                cx(q_matrix[j, col], q_matrix[i, col])
+            with control([qb[0] for qb in controls]):
+                for col in range(i + 1, n + 1):
+                    cx(q_matrix[j, col], q_matrix[i, col])
 
-        x(controls)
+            x(controls)
 
-    # row reduce
-    for j in range(i + 1, n):
-        with control(q_matrix[j, i]):
-            for col in range(i + 1, n + 1):
-                cx(q_matrix[i, col], q_matrix[j, col])
+        # row reduce
+        for j in range(i + 1, n):
+            with control(q_matrix[j, i]):
+                for col in range(i + 1, n + 1):
+                    cx(q_matrix[i, col], q_matrix[j, col])
 
 # back substitution
 for i in range(n - 1, 0, -1):
-    for j in range(i - 1, -1, -1):
-        with control(q_matrix[j, i]):
-            cx(q_matrix[i, 3], q_matrix[j, 3])
+    with control(X[i][0]) :
+        for j in range(i - 1, -1, -1):
+            with control(q_matrix[j, i]):
+                cx(q_matrix[i, 3], q_matrix[j, 3])
 
 res = q_matrix.get_measurement()
 final_state = max(res, key=res.get)
